@@ -15,7 +15,7 @@ A clean, minimal task manager that helps you track daily tasks with a gamified p
 
 ## 🚀 Live Demo
 
-[View Live Demo]([minimal-task-manager-six.vercel.app](https://minimal-task-manager-six.vercel.app/))
+[View Live Demo](https://minimal-task-manager-six.vercel.app/)
 
 ## 💻 Tech Stack
 
