@@ -120,7 +120,8 @@ h1 {
 .task-content {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    flex: 1;
 }
 
 .task-content span:first-child {
@@ -132,11 +133,14 @@ h1 {
     font-size: 0.8rem;
     border-bottom: 2px dotted var(--text-secondary);
     padding-bottom: 1px;
+    margin-right: auto;
 }
 
 .task-buttons {
     display: flex;
     gap: 12px;
+    white-space: nowrap;
+    margin-left: 12px;
 }
 
 .action-text, .delete-text {
@@ -309,21 +313,18 @@ h1 {
 
 @media screen and (max-width: 380px) {
     .task-item {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        align-items: center;
         gap: 8px;
     }
 
     .task-content {
-        width: 100%;
-        flex-wrap: wrap;
-        gap: 8px;
+        flex: 1;
+        flex-wrap: nowrap;
     }
 
     .task-buttons {
-        width: 100%;
-        justify-content: flex-end;
-        padding-top: 8px;
+        padding-top: 0;
     }
 
     .points-history-item {
