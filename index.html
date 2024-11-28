@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Task Manager</h1>
+        
+        <div class="points-display">
+            <h3>Total Points: <span id="totalPoints">0</span></h3>
+        </div>
+        
+        <div class="add-task-container">
+            <input type="text" id="taskInput" placeholder="Enter a new task">
+            <span onclick="addTask()" class="action-text add">add</span>
+        </div>
+
+        <div class="tasks-container">
+            <div class="tasks-header">
+                <h2>Today's Tasks</h2>
+                <span onclick="toggleArchive()" class="action-text">archive</span>
+            </div>
+            <ul id="taskList">
+                <!-- Active tasks will be added here -->
+            </ul>
+            <ul id="archiveList" class="hidden">
+                <!-- Archived tasks will be added here -->
+            </ul>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
