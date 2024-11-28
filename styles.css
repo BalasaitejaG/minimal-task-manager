@@ -26,7 +26,7 @@ body {
 .container {
     max-width: 500px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 15px;
 }
 
 h1 {
@@ -254,4 +254,141 @@ h1 {
 
 .close-modal:hover {
     color: var(--text-primary);
+}
+
+@media screen and (max-width: 768px) {
+    body {
+        padding: 1rem 0;
+    }
+
+    h1 {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .points-display {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .add-task-container {
+        padding: 0.8rem;
+        margin-bottom: 1rem;
+    }
+
+    #taskInput {
+        font-size: 1rem;
+        padding: 8px 4px;
+    }
+
+    .task-item {
+        padding: 0.8rem 0;
+    }
+
+    .action-text, .delete-text {
+        font-size: 0.9rem;
+        padding: 4px 8px;
+    }
+
+    .task-buttons {
+        gap: 16px;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+        margin: 10px;
+        max-height: 90vh;
+    }
+
+    .close-modal {
+        padding: 8px 12px;
+        font-size: 1.8rem;
+    }
+}
+
+@media screen and (max-width: 380px) {
+    .task-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .task-content {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .task-buttons {
+        width: 100%;
+        justify-content: flex-end;
+        padding-top: 8px;
+    }
+
+    .points-history-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .points-history-item .points {
+        margin-left: auto;
+    }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    .container {
+        max-width: 700px;
+        padding: 0 20px;
+    }
+
+    #taskInput {
+        font-size: 1rem;
+        padding: 10px 8px;
+    }
+
+    .action-text, .delete-text {
+        font-size: 0.9rem;
+        padding: 6px 10px;
+    }
+
+    .task-content span:first-child {
+        font-size: 1rem;
+    }
+}
+
+@media (hover: none) {
+    .action-text:active,
+    .delete-text:active {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
+
+    #totalPoints:active {
+        opacity: 0.8;
+    }
+}
+
+.points-history-modal .modal-content {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+}
+
+@supports (padding: max(0px)) {
+    .container {
+        padding-left: max(15px, env(safe-area-inset-left));
+        padding-right: max(15px, env(safe-area-inset-right));
+    }
+
+    body {
+        padding-bottom: max(2rem, env(safe-area-inset-bottom));
+    }
+}
+
+@media screen and (orientation: landscape) {
+    html {
+        -webkit-text-size-adjust: none;
+        text-size-adjust: none;
+    }
 } 
