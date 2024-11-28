@@ -2,7 +2,8 @@
 
 A clean, minimal task manager that helps you track daily tasks with a gamified points system. Built with vanilla JavaScript and designed with simplicity in mind.
 
-![Task Manager Preview](preview.png)
+![Task Manager Preview](<img width="703" alt="taks-manager-app" src="https://github.com/user-attachments/assets/02d0fe17-eab2-4f6f-8e6e-e4ce2226e2d8">
+)
 
 ## 🌟 Features
 
@@ -16,7 +17,7 @@ A clean, minimal task manager that helps you track daily tasks with a gamified p
 
 ## 🚀 Live Demo
 
-[View Live Demo](your-demo-link-here)
+[View Live Demo](minimal-task-manager-six.vercel.app)
 
 ## 💻 Tech Stack
 
@@ -43,4 +44,4 @@ A clean, minimal task manager that helps you track daily tasks with a gamified p
 
 ## 🛠️ Installation
 
-1. Clone the repository: 
+1. Clone the repository: https://github.com/BalasaitejaG/minimal-task-manager.git
