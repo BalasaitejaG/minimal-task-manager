@@ -61,10 +61,11 @@ function addTask() {
         text: taskText,
         points: generateRandomPoints(),
         completed: false,
-        date: new Date().toLocaleDateString()
+        date: new Date().toLocaleDateString(),
+        createdAt: new Date().toISOString()
     };
     
-    tasks.active.push(task);
+    tasks.active.unshift(task);
     saveTasks();
     renderTasks();
     
@@ -118,9 +119,17 @@ function renderTasks() {
         </li>
     `).join('');
     
+    // Sort archived tasks by completion date (newest first)
+    const sortedArchivedTasks = [...tasks.archived].sort((a, b) => {
+        return new Date(b.completedAt) - new Date(a.completedAt);
+    });
+
     // Group archived tasks by completion date
-    const groupedTasks = tasks.archived.reduce((groups, task) => {
-        const dateKey = task.completedAt ? formatDate(task.completedAt) : 'Older Tasks';
+    const groupedTasks = sortedArchivedTasks.reduce((groups, task) => {
+        if (!task.completedAt) {
+            task.completedAt = task.date;
+        }
+        const dateKey = formatDate(task.completedAt);
         if (!groups[dateKey]) {
             groups[dateKey] = [];
         }
@@ -128,12 +137,19 @@ function renderTasks() {
         return groups;
     }, {});
 
+    // Convert grouped tasks to array and sort by date
+    const sortedGroups = Object.entries(groupedTasks).sort((a, b) => {
+        const dateA = new Date(a[1][0].completedAt);
+        const dateB = new Date(b[1][0].completedAt);
+        return dateB - dateA;
+    });
+
     // Render archived tasks grouped by date
-    archiveList.innerHTML = Object.entries(groupedTasks)
-        .map(([date, tasks]) => `
+    archiveList.innerHTML = sortedGroups
+        .map(([date, tasksForDate]) => `
             <li class="archive-date-group">
                 <h3 class="archive-date">${date}</h3>
-                ${tasks.map(task => `
+                ${tasksForDate.map(task => `
                     <li class="task-item archived-task">
                         <div class="task-content">
                             <span>${task.text}</span>
