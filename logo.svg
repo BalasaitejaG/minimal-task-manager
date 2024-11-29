@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <title>TaskFlow Logo</title>
+    <g stroke="none" fill="none">
+        <path d="M24,2H8C6.3,2,5,3.3,5,5v22c0,1.7,1.3,3,3,3h16c1.7,0,3-1.3,3-3V5C27,3.3,25.7,2,24,2z" fill="#FF9F43"/>
+        <path d="M21,0H11C9.3,0,8,1.3,8,3h16C24,1.3,22.7,0,21,0z" fill="#FFB566"/>
+        <path d="M19.7,8.3l-6,6c-0.2,0.2-0.5,0.3-0.7,0.3s-0.5-0.1-0.7-0.3l-2-2c-0.4-0.4-0.4-1,0-1.4s1-0.4,1.4,0l1.3,1.3l5.3-5.3
+            c0.4-0.4,1-0.4,1.4,0S20.1,7.9,19.7,8.3z" fill="#FFFFFF"/>
+    </g>
+</svg>

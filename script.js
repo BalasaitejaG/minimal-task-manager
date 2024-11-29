@@ -1,15 +1,78 @@
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-    // Ctrl/Cmd + / to focus task input
-    if ((e.ctrlKey || e.metaKey) && e.key === '/') {
-        e.preventDefault();
-        document.getElementById('taskInput').focus();
+// Data structure for tasks
+let state = {
+    tasks: [],
+    archivedTasks: [],
+    totalPoints: 0
+};
+
+// Load data from localStorage
+function loadFromLocalStorage() {
+    const savedState = localStorage.getItem('taskManagerState');
+    if (savedState) {
+        state = JSON.parse(savedState);
+        renderTasks();
+        renderArchivedTasks();
+        updateTotalPoints();
     }
-    // Esc to blur task input
-    if (e.key === 'Escape') {
-        document.getElementById('taskInput').blur();
-    }
-});
+}
+
+// Save data to localStorage
+function saveToLocalStorage() {
+    localStorage.setItem('taskManagerState', JSON.stringify(state));
+}
+
+// Update total points display
+function updateTotalPoints() {
+    document.getElementById('totalPoints').textContent = state.totalPoints;
+}
+
+// Render active tasks
+function renderTasks() {
+    const taskList = document.getElementById('taskList');
+    taskList.innerHTML = '';
+    
+    state.tasks.forEach(task => {
+        const taskItem = createTaskElement(task);
+        taskList.appendChild(taskItem);
+    });
+}
+
+// Render archived tasks
+function renderArchivedTasks() {
+    const archiveList = document.getElementById('archiveList');
+    archiveList.innerHTML = '';
+    
+    state.archivedTasks.forEach(task => {
+        const taskItem = document.createElement('li');
+        taskItem.className = 'task-item archived-task';
+        taskItem.innerHTML = `
+            <div class="task-content">
+                <span>${task.text}</span>
+                <span class="task-points">${task.points} pts</span>
+            </div>
+            <div class="archive-date">${new Date(task.archiveDate).toLocaleDateString()}</div>
+        `;
+        archiveList.appendChild(taskItem);
+    });
+}
+
+// Create task element
+function createTaskElement(task) {
+    const taskItem = document.createElement('li');
+    taskItem.className = 'task-item';
+    taskItem.setAttribute('data-id', task.id);
+    taskItem.innerHTML = `
+        <div class="task-content">
+            <span>${task.text}</span>
+            <span class="task-points">${task.points} pts</span>
+        </div>
+        <div class="task-buttons">
+            <span onclick="completeTask(this)" class="action-text" title="Mark as done (Ctrl + D)">done</span>
+            <span onclick="deleteTask(this)" class="delete-text" title="Delete task">delete</span>
+        </div>
+    `;
+    return taskItem;
+}
 
 function toggleArchive() {
     const taskList = document.getElementById('taskList');
@@ -36,26 +99,23 @@ function addTask() {
     
     if (!taskText) return;
     
-    const taskList = document.getElementById('taskList');
-    const points = Math.floor(Math.random() * (120 - 10 + 1)) + 10;
+    const task = {
+        id: Date.now().toString(),
+        text: taskText,
+        points: Math.floor(Math.random() * (120 - 10 + 1)) + 10,
+        createdAt: new Date()
+    };
     
-    const taskItem = document.createElement('li');
+    state.tasks.unshift(task);
+    saveToLocalStorage();
+    
+    const taskItem = createTaskElement(task);
     taskItem.className = 'task-item loading';
-    taskItem.innerHTML = `
-        <div class="task-content">
-            <span>${taskText}</span>
-            <span class="task-points">${points} pts</span>
-        </div>
-        <div class="task-buttons">
-            <span onclick="completeTask(this)" class="action-text" title="Mark as done (Ctrl + D)">done</span>
-            <span onclick="deleteTask(this)" class="delete-text" title="Delete task">delete</span>
-        </div>
-    `;
     
+    const taskList = document.getElementById('taskList');
     taskList.insertBefore(taskItem, taskList.firstChild);
     taskInput.value = '';
 
-    // Remove loading state after animation
     setTimeout(() => {
         taskItem.classList.remove('loading');
     }, 500);
@@ -63,57 +123,57 @@ function addTask() {
 
 function completeTask(element) {
     const taskItem = element.closest('.task-item');
+    const taskId = taskItem.getAttribute('data-id');
     
-    // Prevent multiple clicks
     if (taskItem.classList.contains('completing')) return;
     
     taskItem.classList.add('completing');
     
-    // Get and update points immediately
-    const pointsText = taskItem.querySelector('.task-points').textContent;
-    const points = parseInt(pointsText);
+    // Find task in state
+    const taskIndex = state.tasks.findIndex(t => t.id === taskId);
+    if (taskIndex === -1) return;
     
+    const task = state.tasks[taskIndex];
+    state.totalPoints += task.points;
+    
+    // Update points display
     const totalPointsElement = document.getElementById('totalPoints');
-    const currentPoints = parseInt(totalPointsElement.textContent);
-    totalPointsElement.textContent = currentPoints + points;
-
-    // Animate points increase
+    totalPointsElement.textContent = state.totalPoints;
+    
+    // Animate points
     totalPointsElement.style.transform = 'scale(1.2)';
     setTimeout(() => {
         totalPointsElement.style.transform = 'scale(1)';
     }, 200);
-
-    // Add completion animation
+    
+    // Move to archived tasks
+    task.archiveDate = new Date();
+    state.archivedTasks.unshift(task);
+    state.tasks.splice(taskIndex, 1);
+    saveToLocalStorage();
+    
+    // Animate and remove task
     taskItem.classList.add('completed-task');
-    
-    // Archive the task
-    const archiveList = document.getElementById('archiveList');
-    const taskClone = taskItem.cloneNode(true);
-    taskClone.classList.remove('completing');
-    taskClone.classList.add('archived-task');
-    
-    const dateDiv = document.createElement('div');
-    dateDiv.className = 'archive-date';
-    dateDiv.textContent = new Date().toLocaleDateString();
-    
-    const taskButtons = taskClone.querySelector('.task-buttons');
-    taskButtons.remove();
-    
-    // Wait for completion animation before removing
     setTimeout(() => {
         taskItem.style.opacity = '0';
         taskItem.style.transform = 'translateX(-20px)';
         
         setTimeout(() => {
             taskItem.remove();
-            archiveList.insertBefore(taskClone, archiveList.firstChild);
+            renderArchivedTasks();
         }, 200);
     }, 500);
 }
 
 function deleteTask(element) {
     const taskItem = element.closest('.task-item');
+    const taskId = taskItem.getAttribute('data-id');
+    
     taskItem.classList.add('loading');
+    
+    // Remove from state
+    state.tasks = state.tasks.filter(t => t.id !== taskId);
+    saveToLocalStorage();
     
     setTimeout(() => {
         taskItem.style.transform = 'translateX(-100px)';
@@ -125,22 +185,11 @@ function deleteTask(element) {
     }, 300);
 }
 
-// Add keyboard shortcut for completing tasks
-document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
-        e.preventDefault();
-        const focusedTask = document.activeElement.closest('.task-item');
-        if (focusedTask) {
-            const doneButton = focusedTask.querySelector('.action-text');
-            if (doneButton) {
-                doneButton.click();
-            }
-        }
-    }
-});
-
-// Make tasks focusable for keyboard navigation
+// Initialize app
 document.addEventListener('DOMContentLoaded', function() {
+    loadFromLocalStorage();
+    
+    // Make tasks focusable
     const taskList = document.getElementById('taskList');
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
@@ -155,6 +204,30 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     observer.observe(taskList, { childList: true });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + / to focus task input
+    if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        e.preventDefault();
+        document.getElementById('taskInput').focus();
+    }
+    // Esc to blur task input
+    if (e.key === 'Escape') {
+        document.getElementById('taskInput').blur();
+    }
+    // Ctrl/Cmd + D to complete focused task
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        const focusedTask = document.activeElement.closest('.task-item');
+        if (focusedTask) {
+            const doneButton = focusedTask.querySelector('.action-text');
+            if (doneButton) {
+                doneButton.click();
+            }
+        }
+    }
 });
 
 document.getElementById('taskInput').addEventListener('keypress', function(e) {
