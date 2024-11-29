@@ -67,10 +67,12 @@ h1 {
     display: flex;
     gap: 15px;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 #taskInput {
     flex: 1;
+    min-width: 200px;
     padding: 8px 0;
     background-color: transparent;
     border: none;
@@ -278,11 +280,18 @@ h1 {
     .add-task-container {
         padding: 0.8rem;
         margin-bottom: 1rem;
+        gap: 10px;
     }
 
     #taskInput {
-        font-size: 1rem;
+        width: 100%;
+        min-width: 0;
         padding: 8px 4px;
+    }
+
+    .action-text.add {
+        padding: 4px 12px;
+        margin-left: auto;
     }
 
     .task-item {
