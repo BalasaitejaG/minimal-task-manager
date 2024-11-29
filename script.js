@@ -1,33 +1,41 @@
-// Data structure for tasks
+// Initialize state
 let state = {
     tasks: [],
     archivedTasks: [],
     totalPoints: 0
 };
 
-// Load data from localStorage
-function loadFromLocalStorage() {
-    const savedState = localStorage.getItem('taskManagerState');
-    if (savedState) {
-        state = JSON.parse(savedState);
-        renderTasks();
-        renderArchivedTasks();
-        updateTotalPoints();
+// Load tasks from localStorage
+function loadTasks() {
+    const savedTasks = localStorage.getItem('tasks');
+    if (savedTasks) {
+        const tasks = JSON.parse(savedTasks);
+        renderTasks(tasks);
     }
 }
 
-// Save data to localStorage
-function saveToLocalStorage() {
-    localStorage.setItem('taskManagerState', JSON.stringify(state));
+// Save tasks to localStorage
+function saveTasks() {
+    const tasks = [...state.tasks, ...state.archivedTasks];
+    localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
-// Update total points display
+// Render tasks from state
+function renderTasks(tasks) {
+    state.tasks = tasks.filter(t => !t.archived);
+    state.archivedTasks = tasks.filter(t => t.archived);
+    state.totalPoints = tasks.reduce((sum, task) => sum + (task.archived ? task.points : 0), 0);
+    
+    updateTotalPoints();
+    renderActiveTaskList();
+    renderArchivedTaskList();
+}
+
 function updateTotalPoints() {
     document.getElementById('totalPoints').textContent = state.totalPoints;
 }
 
-// Render active tasks
-function renderTasks() {
+function renderActiveTaskList() {
     const taskList = document.getElementById('taskList');
     taskList.innerHTML = '';
     
@@ -37,8 +45,7 @@ function renderTasks() {
     });
 }
 
-// Render archived tasks
-function renderArchivedTasks() {
+function renderArchivedTaskList() {
     const archiveList = document.getElementById('archiveList');
     archiveList.innerHTML = '';
     
@@ -56,7 +63,6 @@ function renderArchivedTasks() {
     });
 }
 
-// Create task element
 function createTaskElement(task) {
     const taskItem = document.createElement('li');
     taskItem.className = 'task-item';
@@ -68,10 +74,78 @@ function createTaskElement(task) {
         </div>
         <div class="task-buttons">
             <span onclick="completeTask(this)" class="action-text" title="Mark as done (Ctrl + D)">done</span>
-            <span onclick="deleteTask(this)" class="delete-text" title="Delete task">delete</span>
+            <span onclick="deleteTaskFromUI(this)" class="delete-text" title="Delete task">delete</span>
         </div>
     `;
     return taskItem;
+}
+
+function addTask() {
+    const taskInput = document.getElementById('taskInput');
+    const taskText = taskInput.value.trim();
+    
+    if (!taskText) return;
+    
+    const task = {
+        id: Date.now().toString(),
+        text: taskText,
+        points: Math.floor(Math.random() * (120 - 10 + 1)) + 10,
+        createdAt: new Date(),
+        archived: false
+    };
+    
+    state.tasks.push(task);
+    renderTasks([...state.tasks, ...state.archivedTasks]);
+    saveTasks();
+    
+    taskInput.value = '';
+}
+
+function completeTask(element) {
+    const taskItem = element.closest('.task-item');
+    const taskId = taskItem.getAttribute('data-id');
+    
+    if (taskItem.classList.contains('completing')) return;
+    
+    taskItem.classList.add('completing');
+    
+    const task = state.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    task.archived = true;
+    task.archiveDate = new Date();
+    
+    // Animate completion
+    taskItem.classList.add('completed-task');
+    setTimeout(() => {
+        taskItem.style.opacity = '0';
+        taskItem.style.transform = 'translateX(-20px)';
+        
+        setTimeout(() => {
+            renderTasks([...state.tasks, ...state.archivedTasks]);
+            saveTasks();
+        }, 300);
+    }, 500);
+}
+
+function deleteTaskFromUI(element) {
+    const taskItem = element.closest('.task-item');
+    const taskId = taskItem.getAttribute('data-id');
+    
+    taskItem.classList.add('loading');
+    
+    // Animate deletion
+    setTimeout(() => {
+        taskItem.style.transform = 'translateX(-100px)';
+        taskItem.style.opacity = '0';
+        
+        setTimeout(() => {
+            state.tasks = state.tasks.filter(t => t.id !== taskId);
+            state.archivedTasks = state.archivedTasks.filter(t => t.id !== taskId);
+            saveTasks();
+            taskItem.remove();
+        }, 300);
+    }, 300);
 }
 
 function toggleArchive() {
@@ -93,101 +167,9 @@ function toggleArchive() {
     }
 }
 
-function addTask() {
-    const taskInput = document.getElementById('taskInput');
-    const taskText = taskInput.value.trim();
-    
-    if (!taskText) return;
-    
-    const task = {
-        id: Date.now().toString(),
-        text: taskText,
-        points: Math.floor(Math.random() * (120 - 10 + 1)) + 10,
-        createdAt: new Date()
-    };
-    
-    state.tasks.unshift(task);
-    saveToLocalStorage();
-    
-    const taskItem = createTaskElement(task);
-    taskItem.className = 'task-item loading';
-    
-    const taskList = document.getElementById('taskList');
-    taskList.insertBefore(taskItem, taskList.firstChild);
-    taskInput.value = '';
-
-    setTimeout(() => {
-        taskItem.classList.remove('loading');
-    }, 500);
-}
-
-function completeTask(element) {
-    const taskItem = element.closest('.task-item');
-    const taskId = taskItem.getAttribute('data-id');
-    
-    if (taskItem.classList.contains('completing')) return;
-    
-    taskItem.classList.add('completing');
-    
-    // Find task in state
-    const taskIndex = state.tasks.findIndex(t => t.id === taskId);
-    if (taskIndex === -1) return;
-    
-    const task = state.tasks[taskIndex];
-    state.totalPoints += task.points;
-    
-    // Update points display
-    const totalPointsElement = document.getElementById('totalPoints');
-    totalPointsElement.textContent = state.totalPoints;
-    
-    // Animate points
-    totalPointsElement.style.transform = 'scale(1.2)';
-    setTimeout(() => {
-        totalPointsElement.style.transform = 'scale(1)';
-    }, 200);
-    
-    // Move to archived tasks
-    task.archiveDate = new Date();
-    state.archivedTasks.unshift(task);
-    state.tasks.splice(taskIndex, 1);
-    saveToLocalStorage();
-    
-    // Animate and remove task
-    taskItem.classList.add('completed-task');
-    setTimeout(() => {
-        taskItem.style.opacity = '0';
-        taskItem.style.transform = 'translateX(-20px)';
-        
-        setTimeout(() => {
-            taskItem.remove();
-            renderArchivedTasks();
-        }, 200);
-    }, 500);
-}
-
-function deleteTask(element) {
-    const taskItem = element.closest('.task-item');
-    const taskId = taskItem.getAttribute('data-id');
-    
-    taskItem.classList.add('loading');
-    
-    // Remove from state
-    state.tasks = state.tasks.filter(t => t.id !== taskId);
-    saveToLocalStorage();
-    
-    setTimeout(() => {
-        taskItem.style.transform = 'translateX(-100px)';
-        taskItem.style.opacity = '0';
-        
-        setTimeout(() => {
-            taskItem.remove();
-        }, 300);
-    }, 300);
-}
-
 // Initialize app
 document.addEventListener('DOMContentLoaded', function() {
-    loadFromLocalStorage();
+    loadTasks();
     
     // Make tasks focusable
     const taskList = document.getElementById('taskList');
@@ -208,16 +190,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
-    // Ctrl/Cmd + / to focus task input
     if ((e.ctrlKey || e.metaKey) && e.key === '/') {
         e.preventDefault();
         document.getElementById('taskInput').focus();
     }
-    // Esc to blur task input
     if (e.key === 'Escape') {
         document.getElementById('taskInput').blur();
     }
-    // Ctrl/Cmd + D to complete focused task
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
         e.preventDefault();
         const focusedTask = document.activeElement.closest('.task-item');

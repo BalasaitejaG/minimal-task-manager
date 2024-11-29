@@ -304,6 +304,65 @@ h1 {
     color: var(--text-primary);
 }
 
+.auth-container {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.auth-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background-color: var(--card-bg);
+    border: none;
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.auth-button:hover {
+    background-color: var(--hover-bg);
+    transform: translateY(-1px);
+}
+
+.google-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 1rem;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.app-container {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease-out;
+}
+
+.app-container:not(.hidden) {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 @media screen and (max-width: 600px) {
     .container {
         padding: 0 15px;
